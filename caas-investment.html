@@ -1,0 +1,111 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+
+<!--
+`caas-investment`
+Polymer Investment Element for Crowdfunding as a Service Solutions
+
+@demo demo/index.html 
+-->
+
+<dom-module id="caas-investment">
+  <template>
+
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'caas-investment',
+
+      properties: {
+
+        /**
+        * Exposes the server side API endpoint
+        */
+        apiEndpoint: {
+          type: String,
+          value: null,
+          notify: true
+        },
+
+        campaignId: {
+          type: String,
+          value: null
+        },
+
+        contractTypeId: {
+          type: String,
+          value: null
+        },
+
+        amount: {
+          type: Number,
+          value: 0
+        },
+
+        incentiveId: {
+          type: String,
+          value: null
+        },
+
+        accessToken: {
+          type: String,
+          value: null
+        },
+
+        userQualified: {
+          type: Boolean,
+          value: false,
+          readOnly: true,
+          notify: true
+        },
+
+        focusPointsAccepted: {
+          type: Boolean,
+          value: false
+        },
+
+        contractAccepted: {
+          type: Boolean,
+          value: false
+        },
+
+        termsOfUseAccepted: {
+          type: Boolean,
+          value: false
+        },
+
+        checkoutUrl: {
+          type: String,
+          value: null
+        },
+
+        _transactionCosts: {
+          type: Number,
+          value: 0
+        },
+
+        _transactionSignature: {
+          type: String,
+          value: null
+        },
+
+        _draftContract: {
+          type: String,
+          value: null
+        },
+
+      },
+
+      checkout: function() {},
+
+      _getTransactionCosts: function() {},
+
+      _getTransactionSignature: function() {},
+
+      _getDraftContract: function() {}
+
+    });
+  </script>
+</dom-module>
