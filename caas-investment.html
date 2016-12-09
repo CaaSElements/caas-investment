@@ -11,6 +11,15 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 <dom-module id="caas-investment">
   <template>
 
+    <iron-ajax
+      id="getTransactionCosts"
+      url="[[apiEndpoint]]/buckaroo/transactioncosts"
+      handle-as="json"
+      method="GET"
+      last-response="{{_transactionCostsData}}"
+      debounce-duration="3000"
+    ></iron-ajax>
+
   </template>
 
   <script>
@@ -25,33 +34,27 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         */
         apiEndpoint: {
           type: String,
-          value: null,
           notify: true
         },
 
         campaignId: {
-          type: String,
-          value: null
+          type: String
         },
 
         contractTypeId: {
-          type: String,
-          value: null
+          type: String
         },
 
         amount: {
-          type: Number,
-          value: 0
+          type: Number
         },
 
         incentiveId: {
-          type: String,
-          value: null
+          type: String
         },
 
         accessToken: {
-          type: String,
-          value: null
+          type: String
         },
 
         userQualified: {
@@ -61,7 +64,14 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           notify: true
         },
 
-        focusPointsAccepted: {
+        considerations: {
+          type: Array,
+          computed: '_computeConsiderations(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, transactionCosts)',
+          observer: '_handleConsiderationsChanged',
+          notify: true
+        },
+
+        considerationsAccepted: {
           type: Boolean,
           value: false
         },
@@ -81,9 +91,16 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           value: null
         },
 
-        _transactionCosts: {
+        transactionCosts: {
           type: Number,
-          value: 0
+          notify: true,
+          computed: '_computeTransactionCosts(_transactionCostsData.transactionCosts)',
+          observer: '_handleTransactionCostsChanged'
+        },
+
+        _transactionCostsData: {
+          type: Object,
+          value: {}
         },
 
         _transactionSignature: {
@@ -98,13 +115,40 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       },
 
+      observers: [
+        '_getTransactionCosts(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)'
+      ],
+
+      _getTransactionCosts: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {
+        this.$.getTransactionCosts.generateRequest();
+      },
+
       checkout: function() {},
 
-      _getTransactionCosts: function() {},
+      _computeConsiderations: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, transactionCosts) {
+        return [
+        'Er gelden eenmalige transactiekosten van €' + transactionCosts + '. Je loopt het risico om je volledige inleg kwijt te raken, bijvoorbeeld in het geval van faillissement.',
+        'Beleg een verantwoord deel van je vermogen. Investeer uitsluitend met geld dat je kunt missen.',
+        'Spreid je beleggingen. Spreid je risico door in zo divers mogelijke projecten te investeren.',
+        'Lees de volledige overeenkomst en bevestig onderaan dat je deze goed hebt gelezen. Pas daarna kun je investeren.'
+        ]
+      },
+
+      _computeTransactionCosts: function(costs) {
+        return costs;
+      },
 
       _getTransactionSignature: function() {},
 
-      _getDraftContract: function() {}
+      _getDraftContract: function() {},
+
+      _handleConsiderationsChanged: function(considerations) {
+        console.log('_handleConsiderationsChanged', considerations);
+      },
+
+      _handleTransactionCostsChanged: function(transactioncosts) {
+        console.log('_handleTransactionCostsChanged', transactioncosts);
+      }
 
     });
   </script>

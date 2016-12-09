@@ -11,18 +11,118 @@
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../caas-investment.html">
+    <link rel="import" href="../../caas-auth/caas-auth.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
   </head>
   <body>
-    <div class="vertical-section-container centered">
-      <h3>Basic caas-investment demo</h3>
-      <demo-snippet>
-        <template>
-          <caas-investment></caas-investment>
-        </template>
-      </demo-snippet>
-    </div>
+
+    <template
+      id="demo"
+      is="dom-bind"
+      >
+
+      <template is="dom-if" if="[[!signedIn]]">
+
+      <h3>1/4 Sign in</h3>
+
+      <form on-submit="signIn">
+        <label for="username">username</label>
+        <input type="text" id="username" value="investor@caastest.local"><br>
+
+        <label for="password">password</label>
+        <input type="password" id="password" value="abc123"><br>
+
+        <input type="submit" value="Sign In">
+      </form>
+
+      </template>
+
+        <template is="dom-if" if="[[signedIn]]">
+
+          <h3>2/4 Select</h3>
+
+          <form on-submit="showConsiderations">
+
+          <label for="token">Access token</label><br>
+          <input type="text" value="[[accessToken]]" readonly name="token"><p>
+
+          <label for="token">campaign id</label><br>
+          <input type="text" value="{{campaignId::input}}" name="campaignId"><p>
+
+          <label for="token">contract type id</label><br>
+          <input type="text" value="{{contractTypeId::input}}" name="contractTypeId"><p>
+
+          <label for="token">amount</label><br>
+          <input type="number" value="{{amount::input}}" name="amount"><p>
+
+          <label for="token">incentive id</label><br>
+          <input type="text" value="{{incentiveId::input}}" name="incentiveId"><p>
+
+          </form>
+
+          <label for="token">aandachtspunten</label><br>
+          <ul>
+            <template is="dom-repeat" items="[[considerations]]">
+              <li>[[item]]</li>
+            </template>
+          </ul>
+
+      </template>
+      
+      <caas-auth
+        id="auth"
+        api-endpoint="http://canapi.local"
+        signed-in="{{signedIn}}"
+      ></caas-auth>
+
+      <caas-investment
+        api-endpoint="http://canapi.local"
+        access-token="[[accessToken]]"
+        campaign-id="[[campaignId]]"
+        contract-type-id="[[contractTypeId]]"
+        amount="[[amount]]"
+        incentive-id="[[incentiveId]]"
+        considerations="{{considerations}}"
+      ></caas-investment>
+
+    </template>
+
+    <script>
+      var d = document.querySelector('#demo');
+
+      d.addEventListener('dom-change', function() {
+
+        var auth = document.querySelector('#auth');
+        var inv = document.querySelector('caas-investment');
+
+        d.signIn = function(evt) {
+          evt.preventDefault();
+          auth.signIn(
+            document.querySelector('#username').value,
+            document.querySelector('#password').value,
+            'investor'
+          );
+        }
+
+        auth.addEventListener('signed-in', function(data) {
+          d.accessToken = auth.accessToken;
+        })
+
+        auth.addEventListener('sign-in-error', function(data) {
+          alert('error!');
+        })
+
+        auth.signIn(
+          'investor@caastest.local',
+          'abc123',
+          'investor'
+        );
+
+      })
+
+
+    </script>
   </body>
 </html>
