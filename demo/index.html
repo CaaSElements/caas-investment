@@ -19,57 +19,67 @@
   <body>
 
     <template
-      id="demo"
       is="dom-bind"
+      id="demo"
       >
 
+      <h2>Sign in</h2>
+
       <template is="dom-if" if="[[!signedIn]]">
-
-      <h3>1/4 Sign in</h3>
-
       <form on-submit="signIn">
-        <label for="username">username</label>
-        <input type="text" id="username" value="investor@caastest.local"><br>
+        <label for="username">username</label><br>
+        <input type="text" id="username" value="investor@caastest.local"><p>
 
-        <label for="password">password</label>
-        <input type="password" id="password" value="abc123"><br>
+        <label for="password">password</label><br>
+        <input type="password" id="password" value="abc123"><p>
 
         <input type="submit" value="Sign In">
       </form>
-
+      </template>
+      
+      <template is="dom-if" if="[[signedIn]]">
+        <label for="token">signed in</label><br>
+        <small>[[accessToken]]</small>
       </template>
 
-        <template is="dom-if" if="[[signedIn]]">
 
-          <h3>2/4 Select</h3>
+      <h2>Select</h2>
 
-          <form on-submit="showConsiderations">
+      <form on-submit="showConsiderations">
 
-          <label for="token">Access token</label><br>
-          <input type="text" value="[[accessToken]]" readonly name="token"><p>
 
-          <label for="token">campaign id</label><br>
-          <input type="text" value="{{campaignId::input}}" name="campaignId"><p>
+      <label for="token">campaign id</label><br>
+      <input type="text" value="{{campaignId::input}}" name="campaignId"><p>
 
-          <label for="token">contract type id</label><br>
-          <input type="text" value="{{contractTypeId::input}}" name="contractTypeId"><p>
+      <label for="token">contract type id</label><br>
+      <select on-change="setContractType">
+        <option>kies...</option>
+        <template is="dom-repeat" items="[[availableContractTypes]]">
+          <option value="[[item.id]]">[[item.id]]</option>
+        </template>
+      </select><p>
 
-          <label for="token">amount</label><br>
-          <input type="number" value="{{amount::input}}" name="amount"><p>
+      <label for="token">amount</label><br>
+      <input
+        type="number"
+        value="{{amount::input}}"
+        name="amount"
+        min$="[[smallestAllowedAmount]]"
+        max$="[[largestAllowedAmount]]"
+        step$="[[amountStep]]"
+      ><p>
 
-          <label for="token">incentive id</label><br>
-          <input type="text" value="{{incentiveId::input}}" name="incentiveId"><p>
+      <label for="token">incentive id</label><br>
+      <input type="text" value="{{incentiveId::input}}" name="incentiveId"><p>
 
-          </form>
+      </form>
 
-          <label for="token">aandachtspunten</label><br>
-          <ul>
-            <template is="dom-repeat" items="[[considerations]]">
-              <li>[[item]]</li>
-            </template>
-          </ul>
-
-      </template>
+      <label for="token">aandachtspunten</label><br>
+      <ul>
+        <template is="dom-repeat" items="[[considerations]]">
+          <li>[[item]]</li>
+        </template>
+      </ul>
       
       <caas-auth
         id="auth"
@@ -82,6 +92,10 @@
         access-token="[[accessToken]]"
         campaign-id="[[campaignId]]"
         contract-type-id="[[contractTypeId]]"
+        available-contract-types="{{availableContractTypes}}"
+        smallest-allowed-amount="{{smallestAllowedAmount}}"
+        largest-allowed-amount="{{largestAllowedAmount}}"
+        amount-step="{{amountStep}}"
         amount="[[amount]]"
         incentive-id="[[incentiveId]]"
         considerations="{{considerations}}"
@@ -97,6 +111,8 @@
         var auth = document.querySelector('#auth');
         var inv = document.querySelector('caas-investment');
 
+        inv.campaignId = "429";
+
         d.signIn = function(evt) {
           evt.preventDefault();
           auth.signIn(
@@ -104,6 +120,11 @@
             document.querySelector('#password').value,
             'investor'
           );
+        }
+
+        d.setContractType = function(evt) {
+          var contractTypeId = evt.target.options[evt.target.selectedIndex].text;
+          inv.contractTypeId = contractTypeId
         }
 
         auth.addEventListener('signed-in', function(data) {
@@ -114,11 +135,11 @@
           alert('error!');
         })
 
-        auth.signIn(
-          'investor@caastest.local',
-          'abc123',
-          'investor'
-        );
+        // auth.signIn(
+        //   'investor@caastest.local',
+        //   'abc123',
+        //   'investor'
+        // );
 
       })
 

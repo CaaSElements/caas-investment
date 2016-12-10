@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../caas-campaign/caas-campaign.html">
 
 <!--
 `caas-investment`
@@ -10,6 +11,12 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
 <dom-module id="caas-investment">
   <template>
+
+    <caas-campaign
+      api-endpoint="[[apiEndpoint]]"
+      campaign-id="[[campaignId]]"
+      contract-types="{{availableContractTypes}}"
+    ></caas-campaign>
 
     <iron-ajax
       id="getTransactionCosts"
@@ -47,6 +54,24 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
         amount: {
           type: Number
+        },
+
+        smallestAllowedAmount: {
+          type: Number,
+          computed: '_computeSmallestAllowedAmount(contractTypeId, availableContractTypes.*)',
+          notify: true
+        },
+
+        largestAllowedAmount: {
+          type: Number,
+          computed: '_computeLargestAllowedAmount(contractTypeId, availableContractTypes.*)',
+          notify: true
+        },
+
+        amountStep: {
+          type: Number,
+          computed: '_computeAmountStep(contractTypeId, availableContractTypes.*)',
+          notify: true
         },
 
         incentiveId: {
@@ -98,6 +123,11 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           observer: '_handleTransactionCostsChanged'
         },
 
+        availableContractTypes: {
+          type: Object,
+          notify: true
+        },
+
         _transactionCostsData: {
           type: Object,
           value: {}
@@ -112,6 +142,10 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           type: String,
           value: null
         },
+
+        _campaignData: {
+          type: Object,
+        }
 
       },
 
@@ -136,6 +170,34 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       _computeTransactionCosts: function(costs) {
         return costs;
+      },
+
+      _computeContractTypes: function(contractTypeIds) {
+        return contractTypeIds;
+      },
+
+      _computeSmallestAllowedAmount: function(contractTypeId, contractTypesChange) {
+        var contractTypes = contractTypesChange.base;
+        var selectedContractType = contractTypes.filter(function(contractType) {
+          return contractType.id == contractTypeId;
+        })[0]
+        return selectedContractType && selectedContractType.smallestAllowedInvestment;
+      },
+
+      _computeLargestAllowedAmount: function(contractTypeId, contractTypesChange) {
+        var contractTypes = contractTypesChange.base;
+        var selectedContractType = contractTypes.filter(function(contractType) {
+          return contractType.id == contractTypeId;
+        })[0]
+        return selectedContractType && selectedContractType.largestAllowedInvestment;
+      },
+
+      _computeAmountStep: function(contractTypeId, contractTypesChange) {
+        var contractTypes = contractTypesChange.base;
+        var selectedContractType = contractTypes.filter(function(contractType) {
+          return contractType.id == contractTypeId;
+        })[0]
+        return selectedContractType && selectedContractType.investmentStep;
       },
 
       _getTransactionSignature: function() {},
