@@ -1,6 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="../caas-campaign/caas-campaign.html">
+<link rel="import" href="../caas-campaign-incentives/caas-campaign-incentives.html">
 
 <!--
 `caas-investment`
@@ -18,6 +19,12 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       contract-types="{{availableContractTypes}}"
     ></caas-campaign>
 
+    <caas-campaign-incentives
+      api-endpoint="[[apiEndpoint]]"
+      campaign-id="[[campaignId]]"
+      grouped-incentives="{{_apiIncentives}}"
+    ></caas-campaign-incentives>
+
     <iron-ajax
       id="getTransactionCosts"
       url="[[apiEndpoint]]/buckaroo/transactioncosts"
@@ -26,6 +33,116 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       last-response="{{_transactionCostsData}}"
       debounce-duration="3000"
     ></iron-ajax>
+
+    <iron-ajax
+      id="getSignature"
+      url="[[apiEndpoint]]/buckaroo/signature"
+      handle-as="json"
+      content-type="json"
+      headers="[[_requestHeaders]]"
+      body="[[_signatureRequestData]]"
+      method="POST"
+      last-response="{{_signatureData}}"
+      debounce-duration="3000"
+      auto="[[bic]]"
+    ></iron-ajax>
+
+    <form
+      id="checkoutForm"
+      action="[[checkoutUrl]]"
+      method="POST"
+    >
+    <input  
+    type="hidden"                
+    readonly
+    name="Add_userId"  
+    value="[[_signatureData.userId]]">
+    <input  
+    type="hidden"                
+    readonly
+    name="Add_campaignId"  
+    value="[[_signatureData.campaignId]]">
+    <input  
+    type="hidden"                
+    readonly
+    name="Add_contractTypeId"  
+    value="[[_signatureData.contractTypeId]]">
+    <input
+    type="hidden"                
+    readonly
+    name="Add_incentiveId"  
+    value="[[_signatureData.incentiveId]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_amount"  
+    value="[[_signatureData.amount]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_currency"  
+    value="[[_signatureData.currency]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_description"  
+    value="[[_signatureData.description]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_invoicenumber"  
+    value="[[_signatureData.invoiceNumber]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_PAYMENT_METHOD"  
+    value="[[_signatureData.paymentMethod]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_return"  
+    value="[[successCallbackUrl]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_returncancel"  
+    value="[[cancelCallbackUrl]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_returnerror"  
+    value="[[errorCallbackUrl]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_returnreject"  
+    value="[[rejectCallbackUrl]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_SERVICE_ideal_action"  
+    value="[[_signatureData.iDEALAction]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_SERVICE_ideal_issuer"  
+    value="[[_signatureData.iDEALIssuer]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_SERVICE_ideal_version"  
+    value="[[_signatureData.iDEALVersion]]">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_websitekey"  
+    value="{{_signatureData.websiteKey}}">
+    <input  
+    type="hidden"                
+    readonly 
+    name="Brq_signature"  
+    value="{{_signatureData.signature}}">
+    </form>
 
   </template>
 
@@ -124,8 +241,100 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         },
 
         availableContractTypes: {
-          type: Object,
+          type: Array,
+          value: null,
           notify: true
+        },
+
+        availableIncentives: {
+          type: Array,
+          value: null,
+          computed: '_computeAvailableIncentives(_apiIncentives.*, contractTypeId)',
+          notify: true
+        },
+
+        bic: {
+          type: String
+        },
+
+        availableBanks: {
+          type: Array,
+          value: [
+            {
+              name: "ABN AMRO Bank",
+              bic: "ABNANL2A"
+            },
+            {
+              name: "ASN Bank",
+              bic: "ASNBNL21"
+            },
+            {
+              name: "Bunq bank",
+              bic: "BUNQNL2A"
+            },
+            {
+              name: "ING Bank",
+              bic: "INGBNL2A"
+            },
+            {
+              name: "Knab",
+              bic: "KNABNL2H"
+            },
+            {
+              name: "Rabobank",
+              bic: "RABONL2U"
+            },
+            {
+              name: "RegioBank",
+              bic: "RBRBNL21"
+            },
+            {
+              name: "SNS bank",
+              bic: "SNSBNL2A"
+            },
+            {
+              name: "Triodos Bank",
+              bic: "TRIONL2U"
+            },
+            {
+              name: "Van Lanschot",
+              bic: "FVLBNL22"
+            }
+          ],
+          notify: true
+        },
+
+        checkoutUrl: {
+          type: String,
+          value: 'https://testcheckout.buckaroo.nl/html/'
+        },
+
+        successCallbackUrl: {
+          type: String
+        },
+
+        cancelCallbackUrl: {
+          type: String
+        },
+
+        errorCallbackUrl: {
+          type: String
+        },
+
+        rejectCallbackUrl: {
+          type: String
+        },
+
+        checkoutAllowed: {
+          type: Boolean,
+          value: false,
+          computed: '_computeCheckoutAllowed(_signatureData.signature)',
+          notify: true
+        },
+
+        _signatureRequestData: {
+          type: String,
+          computed: '_computeSignatureRequestData(campaignId, incentiveId, contractTypeId, amount, bic, successCallbackUrl, cancelCallbackUrl, errorCallbackUrl, rejectCallbackUrl)'
         },
 
         _transactionCostsData: {
@@ -145,6 +354,20 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
         _campaignData: {
           type: Object,
+        },
+
+        _apiIncentives: {
+          type: Object
+        },
+
+        _requestHeaders: {
+          type: Object,
+          computed: '_computeRequestHeaders(accessToken)'
+        },
+
+        _signatureData: {
+          type: Object,
+          observer: '_handleSignatureDataChanged'
         }
 
       },
@@ -157,15 +380,62 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         this.$.getTransactionCosts.generateRequest();
       },
 
-      checkout: function() {},
+      checkout: function() {
+        this.$.checkoutForm.submit();
+      },
+
+      _computeRequestHeaders: function(accessToken) {
+        return {
+          'authorization': 'Bearer ' + accessToken 
+        }
+      },
+
+      _computeSignatureRequestData: function(campaignId, incentiveId, contractTypeId, amount, bic, successCallbackUrl, cancelCallbackUrl, errorCallbackUrl, rejectCallbackUrl) {
+        return JSON.stringify({
+          "campaignId": campaignId,
+          "incentiveId": incentiveId,
+          "contractTypeId": contractTypeId,
+          "amount": amount,
+          "BIC": bic,
+          "successCallbackUrl": successCallbackUrl,
+          "cancelCallbackUrl": cancelCallbackUrl,
+          "errorCallbackUrl": errorCallbackUrl,
+          "rejectCallbackUrl": rejectCallbackUrl
+        })
+      },
+
+      _computeAvailableIncentives: function(apiIncentives, contractTypeId) {
+        return this._apiIncentives[contractTypeId];
+      },
 
       _computeConsiderations: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, transactionCosts) {
-        return [
-        'Er gelden eenmalige transactiekosten van €' + transactionCosts + '. Je loopt het risico om je volledige inleg kwijt te raken, bijvoorbeeld in het geval van faillissement.',
-        'Beleg een verantwoord deel van je vermogen. Investeer uitsluitend met geld dat je kunt missen.',
-        'Spreid je beleggingen. Spreid je risico door in zo divers mogelijke projecten te investeren.',
-        'Lees de volledige overeenkomst en bevestig onderaan dat je deze goed hebt gelezen. Pas daarna kun je investeren.'
-        ]
+
+        var considerations = [];
+
+        // var one = '';
+
+        switch(parseInt(contractTypeId)) {
+          case 1:
+          case 2:
+            considerations = ['Je doet een vooraankoop. Omdat de levering vaak op langere termijn plaats vindt zijn er risico\'s bij een eventueel faillissement.'];
+            break;
+          default:
+            considerations = [
+              'Beleg een verantwoord deel van je vermogen. Investeer uitsluitend met geld dat je kunt missen.',
+              'Spreid je beleggingen. Spreid je risico door in zo divers mogelijke projecten te investeren.',
+              'Lees de volledige overeenkomst en bevestig onderaan dat je deze goed hebt gelezen. Pas daarna kun je investeren.'
+            ]
+            break;
+        }
+
+        considerations.splice(0, 0, 'Er gelden eenmalige transactiekosten van €' + transactionCosts + '. Je loopt het risico om je volledige inleg kwijt te raken, bijvoorbeeld in het geval van faillissement.');
+
+        return considerations;
+
+      },
+
+      _computeCheckoutAllowed: function(signature) {
+        return !!signature;
       },
 
       _computeTransactionCosts: function(costs) {
@@ -181,7 +451,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         var selectedContractType = contractTypes.filter(function(contractType) {
           return contractType.id == contractTypeId;
         })[0]
-        return selectedContractType && selectedContractType.smallestAllowedInvestment;
+        return (selectedContractType) ? selectedContractType.smallestAllowedInvestment : null;
       },
 
       _computeLargestAllowedAmount: function(contractTypeId, contractTypesChange) {
@@ -189,7 +459,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         var selectedContractType = contractTypes.filter(function(contractType) {
           return contractType.id == contractTypeId;
         })[0]
-        return selectedContractType && selectedContractType.largestAllowedInvestment;
+        return (selectedContractType) ? selectedContractType.largestAllowedInvestment : null;
       },
 
       _computeAmountStep: function(contractTypeId, contractTypesChange) {
@@ -197,7 +467,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         var selectedContractType = contractTypes.filter(function(contractType) {
           return contractType.id == contractTypeId;
         })[0]
-        return selectedContractType && selectedContractType.investmentStep;
+        return (selectedContractType) ? selectedContractType.investmentStep : null;
       },
 
       _getTransactionSignature: function() {},
@@ -205,11 +475,15 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       _getDraftContract: function() {},
 
       _handleConsiderationsChanged: function(considerations) {
-        console.log('_handleConsiderationsChanged', considerations);
+        //console.log('_handleConsiderationsChanged', considerations);
       },
 
       _handleTransactionCostsChanged: function(transactioncosts) {
-        console.log('_handleTransactionCostsChanged', transactioncosts);
+        //console.log('_handleTransactionCostsChanged', transactioncosts);
+      },
+
+      _handleSignatureDataChanged: function(signatureData) {
+        console.log('_handleSignatureDataChanged', signatureData);        
       }
 
     });

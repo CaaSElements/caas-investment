@@ -14,136 +14,150 @@
     <link rel="import" href="../../caas-auth/caas-auth.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
+      small {
+        word-wrap: break-word;
+      }
     </style>
   </head>
   <body>
 
-    <template
-      is="dom-bind"
-      id="demo"
-      >
+    <div class="vertical-section-container centered">
+      <h3>Basic caas-campaign-investment Demo</h3>
 
-      <h2>Sign in</h2>
+      <demo-snippet>
+        <template is="dom-bind" id="demo">
 
-      <template is="dom-if" if="[[!signedIn]]">
-      <form on-submit="signIn">
-        <label for="username">username</label><br>
-        <input type="text" id="username" value="investor@caastest.local"><p>
+          <caas-auth
+            id="auth"
+            api-endpoint="http://canapi.local"
+            signed-in="{{signedIn}}"
+            access-token="{{accessToken}}"
+          ></caas-auth>
 
-        <label for="password">password</label><br>
-        <input type="password" id="password" value="abc123"><p>
+          <caas-investment
+            api-endpoint="http://canapi.local"
+            access-token="[[accessToken]]"
+            campaign-id="[[campaignId]]"
+            contract-type-id="[[contractTypeId]]"
+            available-contract-types="{{availableContractTypes}}"
+            incentive-id="[[incentiveId]]"
+            available-incentives="{{availableIncentives}}"
+            amount="[[amount]]"
+            smallest-allowed-amount="{{smallestAllowedAmount}}"
+            largest-allowed-amount="{{largestAllowedAmount}}"
+            amount-step="{{amountStep}}"
+            bic="[[bic]]"
+            available-banks="{{availableBanks}}"
+            considerations="{{considerations}}"
+            checkout-allowed="{{checkoutAllowed}}"
+            success-callback-url="http://placetobe.nl/success"
+            cancel-callback-url="http://placetobe.nl/cancel"
+            error-callback-url="http://placetobe.nl/error"
+            reject-callback-url="http://placetobe.nl/reject"
+          ></caas-investment>
 
-        <input type="submit" value="Sign In">
-      </form>
-      </template>
-      
-      <template is="dom-if" if="[[signedIn]]">
-        <label for="token">signed in</label><br>
-        <small>[[accessToken]]</small>
-      </template>
+          <h2>Sign in</h2>
 
+          <template is="dom-if" if="[[!signedIn]]">
+            <form on-submit="signIn">
+              <label for="username">username</label><br>
+              <input type="text" id="username" value="investor@caastest.local"><p>
+              <label for="password">password</label><br>
+              <input type="password" id="password" value="abc123"><p>
+              <input type="submit" value="Sign In">
+            </form>
+          </template>
+            
+          <template is="dom-if" if="[[signedIn]]">
+            <label for="token">signed in</label><br>
+            <small>[[accessToken]]</small>
+          </template>
 
-      <h2>Select</h2>
+          <h2>Select</h2>
 
-      <form on-submit="showConsiderations">
+          <form on-submit="showConsiderations">
 
+            <label for="token">campaign id</label><br>
+            <input type="text" value="{{campaignId::input}}" name="campaignId"><p>
+            <label for="token">contract type id</label><br>
+            <select value="{{contractTypeId::change}}" disabled$="[[!availableContractTypes]]">
+              <option>kies...</option>
+              <template is="dom-repeat" items="[[availableContractTypes]]">
+                <option value="[[item.id]]">[[item.id]]</option>
+              </template>
+            </select><p>
 
-      <label for="token">campaign id</label><br>
-      <input type="text" value="{{campaignId::input}}" name="campaignId"><p>
+            <label for="token">amount (min [[smallestAllowedAmount]], max [[largestAllowedAmount]] in stappen van [[amountStep]]</label><br>
+            <input
+              type="number"
+              value="{{amount::input}}"
+              name="amount"
+              min$="[[smallestAllowedAmount]]"
+              max$="[[largestAllowedAmount]]"
+              step$="[[amountStep]]"
+            ><p>
 
-      <label for="token">contract type id</label><br>
-      <select on-change="setContractType">
-        <option>kies...</option>
-        <template is="dom-repeat" items="[[availableContractTypes]]">
-          <option value="[[item.id]]">[[item.id]]</option>
+            <label for="token">incentive id</label><br>
+            <select value="{{incentiveId::change}}" disabled$="[[!availableIncentives]]">
+              <option>kies...</option>
+              <template is="dom-repeat" items="[[availableIncentives]]">
+                <option value="[[item.id]]" disabled$="[[!item.available]]">[[item.id]] ([[item.minimumInvestment]] of meer)</option>
+              </template>
+            </select><p>
+
+          </form>
+
+          <label for="token">aandachtspunten</label><br>
+          <ul>
+            <template is="dom-repeat" items="[[considerations]]">
+              <li>[[item]]</li>
+            </template>
+          </ul>
+
+          <h2>Checkout</h2>
+
+          <form on-submit="checkout">
+
+            <label for="token">Bank (BIC)</label><br>
+            <select value="{{bic::change}}">
+              <option>kies...</option>
+              <template is="dom-repeat" items="[[availableBanks]]">
+                <option value="[[item.bic]]">[[item.name]] ([[item.bic]])</option>
+              </template>
+            </select><p>
+            <input type="submit" value="betaal" disabled$="[[!checkoutAllowed]]">
+
+          </form>
+
+          <script>
+            var d = document.querySelector('#demo');
+            var auth = document.querySelector('#auth');
+            var inv = document.querySelector('caas-investment');
+
+            d.signIn = function(evt) {
+              evt.preventDefault();
+              auth.signIn(
+                document.querySelector('#username').value,
+                document.querySelector('#password').value,
+                'investor'
+              );
+            }
+
+            d.checkout = function(evt) {
+              evt.preventDefault();
+              inv.checkout();
+            }
+
+            auth.addEventListener('sign-in-error', function(data) {
+              alert('error while logging in!');
+            })
+
+          </script>
+
         </template>
-      </select><p>
+      </demo-snippet>
 
-      <label for="token">amount</label><br>
-      <input
-        type="number"
-        value="{{amount::input}}"
-        name="amount"
-        min$="[[smallestAllowedAmount]]"
-        max$="[[largestAllowedAmount]]"
-        step$="[[amountStep]]"
-      ><p>
+    </div>
 
-      <label for="token">incentive id</label><br>
-      <input type="text" value="{{incentiveId::input}}" name="incentiveId"><p>
-
-      </form>
-
-      <label for="token">aandachtspunten</label><br>
-      <ul>
-        <template is="dom-repeat" items="[[considerations]]">
-          <li>[[item]]</li>
-        </template>
-      </ul>
-      
-      <caas-auth
-        id="auth"
-        api-endpoint="http://canapi.local"
-        signed-in="{{signedIn}}"
-      ></caas-auth>
-
-      <caas-investment
-        api-endpoint="http://canapi.local"
-        access-token="[[accessToken]]"
-        campaign-id="[[campaignId]]"
-        contract-type-id="[[contractTypeId]]"
-        available-contract-types="{{availableContractTypes}}"
-        smallest-allowed-amount="{{smallestAllowedAmount}}"
-        largest-allowed-amount="{{largestAllowedAmount}}"
-        amount-step="{{amountStep}}"
-        amount="[[amount]]"
-        incentive-id="[[incentiveId]]"
-        considerations="{{considerations}}"
-      ></caas-investment>
-
-    </template>
-
-    <script>
-      var d = document.querySelector('#demo');
-
-      d.addEventListener('dom-change', function() {
-
-        var auth = document.querySelector('#auth');
-        var inv = document.querySelector('caas-investment');
-
-        inv.campaignId = "429";
-
-        d.signIn = function(evt) {
-          evt.preventDefault();
-          auth.signIn(
-            document.querySelector('#username').value,
-            document.querySelector('#password').value,
-            'investor'
-          );
-        }
-
-        d.setContractType = function(evt) {
-          var contractTypeId = evt.target.options[evt.target.selectedIndex].text;
-          inv.contractTypeId = contractTypeId
-        }
-
-        auth.addEventListener('signed-in', function(data) {
-          d.accessToken = auth.accessToken;
-        })
-
-        auth.addEventListener('sign-in-error', function(data) {
-          alert('error!');
-        })
-
-        // auth.signIn(
-        //   'investor@caastest.local',
-        //   'abc123',
-        //   'investor'
-        // );
-
-      })
-
-
-    </script>
   </body>
 </html>
