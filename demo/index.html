@@ -17,6 +17,10 @@
       small {
         word-wrap: break-word;
       }
+
+      .centered {
+        max-width: 600px;
+      }
     </style>
   </head>
   <body>
@@ -32,11 +36,13 @@
             api-endpoint="http://canapi.local"
             signed-in="{{signedIn}}"
             access-token="{{accessToken}}"
+            user-id="{{investorId}}"
           ></caas-auth>
 
           <caas-investment
             api-endpoint="http://canapi.local"
             access-token="[[accessToken]]"
+            investor-id="[[investorId]]"
             campaign-id="[[campaignId]]"
             contract-type-id="[[contractTypeId]]"
             available-contract-types="{{availableContractTypes}}"
@@ -49,11 +55,18 @@
             bic="[[bic]]"
             available-banks="{{availableBanks}}"
             considerations="{{considerations}}"
+            considerations-accepted="{{considerationsAccepted}}"
             checkout-allowed="{{checkoutAllowed}}"
             success-callback-url="http://placetobe.nl/success"
             cancel-callback-url="http://placetobe.nl/cancel"
             error-callback-url="http://placetobe.nl/error"
             reject-callback-url="http://placetobe.nl/reject"
+            on-investment-signed="_handleInvestmentSigned"
+            on-investment-sign-error="_handleInvestmentSignError"
+            contract-accepted="{{contractAccepted}}"
+            on-contract-drafted="_handleContractDrafted"
+            on-contract-draft-error="_handleContractDraftError"
+            on-considerations-acceptance-changed="_handleConsiderationsAcceptanceChanged"
           ></caas-investment>
 
           <h2>Sign in</h2>
@@ -107,12 +120,23 @@
 
           </form>
 
-          <label for="token">aandachtspunten</label><br>
+          <h2>Approve Considerations</h2>
+
           <ul>
             <template is="dom-repeat" items="[[considerations]]">
               <li>[[item]]</li>
             </template>
           </ul>
+          <label for="acceptConsiderations">accept considerations</label>
+          <input type="checkbox" id="acceptConsiderations" on-change="_handleChangeConsiderationsAccepted">
+
+          <h2>Approve Contract</h2>
+
+          <section id="draftContract" style="max-height:300px;border: 1px solid black;padding: 10px;overflow: auto"></section>
+          <label for="acceptContract">accept contract</label>
+          <input type="checkbox" id="acceptContract" on-change="_handleChangeContractAccepted">
+
+          </form>
 
           <h2>Checkout</h2>
 
@@ -133,7 +157,7 @@
             var d = document.querySelector('#demo');
             var auth = document.querySelector('#auth');
             var inv = document.querySelector('caas-investment');
-            d.campaignId = 719;
+            d.campaignId = 749;
 
             d.signIn = function(evt) {
               evt.preventDefault();
@@ -147,6 +171,34 @@
             d.checkout = function(evt) {
               evt.preventDefault();
               inv.checkout();
+            }
+
+            d._handleInvestmentSigned = function(evt) {
+              console.info('investment signed!')
+            }
+
+            d._handleInvestmentSignError = function(evt, error) {
+              alert(error.message)
+            }
+
+            d._handleContractDrafted = function(evt, contract) {
+              document.querySelector('#draftContract').innerHTML = contract;
+            }
+
+            d._handleContractDraftError = function(evt, error) {
+              alert(error.message)
+            }
+
+            d._handleChangeConsiderationsAccepted = function(evt) {
+              inv.considerationsAccepted = !!evt.target.checked;
+            }
+
+            d._handleChangeContractAccepted = function(evt) {
+              inv.contractAccepted = !!evt.target.checked;
+            }
+
+            d._handleConsiderationsAcceptanceChanged = function(evt, value) {
+              document.querySelector('#acceptContract').checked = false;
             }
 
             auth.addEventListener('sign-in-error', function(data) {

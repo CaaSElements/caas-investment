@@ -35,6 +35,19 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
     ></iron-ajax>
 
     <iron-ajax
+      id="getDraftContract"
+      url="[[apiEndpoint]]/investors/[[investorId]]/draftcontract"
+      handle-as="json"
+      headers="[[_requestHeaders]]"
+      body="[[_contractRequestData]]"
+      method="POST"
+      last-response="{{_draftContractData}}"
+      on-response="_handleGetContractResponse"
+      on-error="_handleGetContractError"
+      debounce-duration="3000"
+    ></iron-ajax>
+
+    <iron-ajax
       id="getSignature"
       url="[[apiEndpoint]]/buckaroo/signature"
       handle-as="json"
@@ -43,6 +56,8 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       body="[[_signatureRequestData]]"
       method="POST"
       last-response="{{_signatureData}}"
+      on-response="_handleGetSignatureResponse"
+      on-error="_handleGetSignatureError"
       debounce-duration="3000"
       auto="[[bic]]"
     ></iron-ajax>
@@ -199,6 +214,10 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           type: String
         },
 
+        investorId: {
+          type: String
+        },
+
         userQualified: {
           type: Boolean,
           value: false,
@@ -209,23 +228,23 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         considerations: {
           type: Array,
           computed: '_computeConsiderations(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, transactionCosts)',
-          observer: '_handleConsiderationsChanged',
           notify: true
         },
 
         considerationsAccepted: {
           type: Boolean,
-          value: false
+          notify: true,
+          observer: '_handleConsiderationsAcceptedChanged'
         },
 
         contractAccepted: {
           type: Boolean,
-          value: false
+          notify: true
         },
 
         termsOfUseAccepted: {
           type: Boolean,
-          value: false
+          notify: true
         },
 
         checkoutUrl: {
@@ -237,7 +256,6 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           type: Number,
           notify: true,
           computed: '_computeTransactionCosts(_transactionCostsData.transactionCosts)',
-          observer: '_handleTransactionCostsChanged'
         },
 
         availableContractTypes: {
@@ -328,7 +346,13 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         checkoutAllowed: {
           type: Boolean,
           value: false,
-          computed: '_computeCheckoutAllowed(_signatureData.signature)',
+          computed: '_computeCheckoutAllowed(_signatureData.signature, considerationsAccepted, contractAccepted)',
+          notify: true
+        },
+
+        draftContract: {
+          type: String,
+          computed: '_computeDraftContract(_draftContractData.body, considerationsAccepted)',
           notify: true
         },
 
@@ -337,17 +361,17 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           computed: '_computeSignatureRequestData(campaignId, incentiveId, contractTypeId, amount, bic, successCallbackUrl, cancelCallbackUrl, errorCallbackUrl, rejectCallbackUrl)'
         },
 
+        _contractRequestData: {
+          type: String,
+          computed: '_computeContractRequestData(campaignId, incentiveId, contractTypeId, amount)'
+        },
+
         _transactionCostsData: {
           type: Object,
           value: {}
         },
 
         _transactionSignature: {
-          type: String,
-          value: null
-        },
-
-        _draftContract: {
           type: String,
           value: null
         },
@@ -366,22 +390,30 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         },
 
         _signatureData: {
-          type: Object,
-          observer: '_handleSignatureDataChanged'
+          type: Object
+        },
+
+        _draftContractData: {
+          type: String
         }
 
       },
 
       observers: [
-        '_getTransactionCosts(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)'
+        '_getTransactionCosts(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)',
+        'getDraftContract(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, considerationsAccepted)'
       ],
-
-      _getTransactionCosts: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {
-        this.$.getTransactionCosts.generateRequest();
-      },
 
       checkout: function() {
         this.$.checkoutForm.submit();
+      },
+
+      getDraftContract: function() {
+        this.$.getDraftContract.generateRequest();
+      },
+
+      _getTransactionCosts: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {
+        this.$.getTransactionCosts.generateRequest();
       },
 
       _computeRequestHeaders: function(accessToken) {
@@ -401,6 +433,15 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           "cancelCallbackUrl": cancelCallbackUrl,
           "errorCallbackUrl": errorCallbackUrl,
           "rejectCallbackUrl": rejectCallbackUrl
+        })
+      },
+
+      _computeContractRequestData: function(campaignId, incentiveId, contractTypeId, amount) {
+        return JSON.stringify({
+          "campaignId": campaignId,
+          "incentiveId": incentiveId,
+          "contractTypeId": contractTypeId,
+          "amount": amount
         })
       },
 
@@ -434,8 +475,8 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       },
 
-      _computeCheckoutAllowed: function(signature) {
-        return !!signature;
+      _computeCheckoutAllowed: function(signature, considerationsAccepted, contractAccepted) {
+        return (!!signature && !!considerationsAccepted && !!contractAccepted);
       },
 
       _computeTransactionCosts: function(costs) {
@@ -470,20 +511,38 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         return (selectedContractType) ? selectedContractType.investmentStep : null;
       },
 
-      _getTransactionSignature: function() {},
-
-      _getDraftContract: function() {},
-
-      _handleConsiderationsChanged: function(considerations) {
-        //console.log('_handleConsiderationsChanged', considerations);
+      _computeDraftContract: function(draftContractBody, considerationsAccepted) {
+        if(!considerationsAccepted) return '';
+        return draftContractBody;
       },
 
-      _handleTransactionCostsChanged: function(transactioncosts) {
-        //console.log('_handleTransactionCostsChanged', transactioncosts);
+      _handleConsiderationsAcceptedChanged: function(considerationsAccepted) {
+        if(considerationsAccepted) this.fire('considerations-accepted');
+        else this.fire('considerations-unaccepted');
+        this.fire('considerations-acceptance-changed', considerationsAccepted);
+        this.contractAccepted = false;
       },
 
-      _handleSignatureDataChanged: function(signatureData) {
-        console.log('_handleSignatureDataChanged', signatureData);        
+      _handleGetSignatureResponse: function() {
+        this.fire('investment-signed');
+      },
+
+      _handleGetSignatureError: function(evt) {
+        this.fire('investment-sign-error', {
+          message: evt.detail.error.message,
+          response: event.detail.request.xhr.response
+        });
+      },
+
+      _handleGetContractResponse: function() {
+        this.fire('contract-drafted', this.draftContract);
+      },
+
+      _handleGetContractError: function(evt) {
+        this.fire('contract-draft-error', {
+          message: evt.detail.error.message,
+          response: event.detail.request.xhr.response
+        });
       }
 
     });
