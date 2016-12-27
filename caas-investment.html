@@ -401,7 +401,8 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       observers: [
         '_getTransactionCosts(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)',
-        'getDraftContract(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, considerationsAccepted)'
+        'getDraftContract(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, considerationsAccepted)',
+        '_resetConsiderations(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)'
       ],
 
       checkout: function() {
@@ -410,6 +411,10 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       getDraftContract: function() {
         this.$.getDraftContract.generateRequest();
+      },
+
+      _resetConsiderations: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {
+        this.considerationsAccepted = false;
       },
 
       _getTransactionCosts: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {

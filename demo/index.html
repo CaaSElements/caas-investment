@@ -198,6 +198,7 @@
             }
 
             d._handleConsiderationsAcceptanceChanged = function(evt, value) {
+              if(value === false) document.querySelector('#acceptConsiderations').checked = false;
               document.querySelector('#acceptContract').checked = false;
             }
 
