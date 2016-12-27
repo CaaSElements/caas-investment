@@ -66,7 +66,6 @@
             contract-accepted="{{contractAccepted}}"
             on-contract-drafted="_handleContractDrafted"
             on-contract-draft-error="_handleContractDraftError"
-            on-considerations-acceptance-changed="_handleConsiderationsAcceptanceChanged"
           ></caas-investment>
 
           <h2>Sign in</h2>
@@ -128,13 +127,13 @@
             </template>
           </ul>
           <label for="acceptConsiderations">accept considerations</label>
-          <input type="checkbox" id="acceptConsiderations" on-change="_handleChangeConsiderationsAccepted">
+          <input type="checkbox" id="acceptConsiderations" checked="{{considerationsAccepted::change}}">
 
           <h2>Approve Contract</h2>
 
           <section id="draftContract" style="max-height:300px;border: 1px solid black;padding: 10px;overflow: auto"></section>
           <label for="acceptContract">accept contract</label>
-          <input type="checkbox" id="acceptContract" on-change="_handleChangeContractAccepted">
+          <input type="checkbox" id="acceptContract" checked="{{contractAccepted::change}}">
 
           </form>
 
@@ -191,15 +190,6 @@
 
             d._handleChangeConsiderationsAccepted = function(evt) {
               inv.considerationsAccepted = !!evt.target.checked;
-            }
-
-            d._handleChangeContractAccepted = function(evt) {
-              inv.contractAccepted = !!evt.target.checked;
-            }
-
-            d._handleConsiderationsAcceptanceChanged = function(evt, value) {
-              if(value === false) document.querySelector('#acceptConsiderations').checked = false;
-              document.querySelector('#acceptContract').checked = false;
             }
 
             auth.addEventListener('sign-in-error', function(data) {
