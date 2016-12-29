@@ -169,101 +169,138 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       properties: {
 
         /**
-        * Exposes the server side API endpoint
+        * The Server side API endpoint
         */
         apiEndpoint: {
           type: String,
           notify: true
         },
 
+        /**
+        * The unique id of the associated campaign
+        */
         campaignId: {
           type: String
         },
 
+        /**
+        * The id of the associated contract type
+        */
         contractTypeId: {
           type: String
         },
 
+        /**
+        * Investable amount, in euros
+        */
         amount: {
           type: Number
         },
 
+        /**
+        * The smallest allowed `amount` in euros
+        */
         smallestAllowedAmount: {
           type: Number,
           computed: '_computeSmallestAllowedAmount(contractTypeId, availableContractTypes.*)',
           notify: true
         },
 
+        /**
+        * The largest allowed `amount` in euros
+        */
         largestAllowedAmount: {
           type: Number,
           computed: '_computeLargestAllowedAmount(contractTypeId, availableContractTypes.*)',
           notify: true
         },
 
+        /**
+        * The step `amount` may be increased with
+        */
         amountStep: {
           type: Number,
           computed: '_computeAmountStep(contractTypeId, availableContractTypes.*)',
           notify: true
         },
 
+        /**
+        * The id of the chosen incentive
+        */
         incentiveId: {
           type: String
         },
 
+        /**
+        * The access token (JSON web token) associated with the current user session
+        */
         accessToken: {
           type: String
         },
 
+        /**
+        * The user id associated with the current user session
+        */
         investorId: {
           type: String
         },
 
-        userQualified: {
-          type: Boolean,
-          value: false,
-          readOnly: true,
-          notify: true
-        },
-
+        /**
+        * Considerations that a user needs to accept in order to `checkout()`
+        */
         considerations: {
           type: Array,
           computed: '_computeConsiderations(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, transactionCosts)',
           notify: true
         },
 
+        /**
+        * Exposes whether the user accepted the `considerations`
+        */
         considerationsAccepted: {
           type: Boolean,
           notify: true,
           observer: '_handleConsiderationsAcceptedChanged'
         },
 
+        /**
+        * Contract that a user needs to accept in order to `checkout()`
+        */
+        draftContract: {
+          type: String,
+          computed: '_computeDraftContract(_draftContractData.body, considerationsAccepted)',
+          notify: true
+        },
+
+        /**
+        * Exposes whether the user accepted the `draftContract`
+        */
         contractAccepted: {
           type: Boolean,
           notify: true
         },
 
-        termsOfUseAccepted: {
-          type: Boolean,
-          notify: true
-        },
-
-        checkoutUrl: {
-          type: String,
-          value: null
-        },
-
+        /**
+        * Exposes the additional transaction costs for this investment
+        */
         transactionCosts: {
           type: Number,
           notify: true,
           computed: '_computeTransactionCosts(_transactionCostsData.transactionCosts)',
         },
 
+        /**
+        * Exposes a list of available (allowed) contract types
+        */
         availableContractTypes: {
           type: Array,
           value: null,
           notify: true
         },
 
+        /**
+        * Exposes a list of available (allowed) incentives
+        */
         availableIncentives: {
           type: Array,
           value: null,
@@ -271,10 +308,17 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           notify: true
         },
 
+        /**
+        * The BIC code associated with the bank a user uses to checkout
+        */
         bic: {
-          type: String
+          type: String,
+          notify: true
         },
 
+        /**
+        * Exposes a list of available banks and bics
+        */
         availableBanks: {
           type: Array,
           value: [
@@ -322,37 +366,49 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           notify: true
         },
 
+        /**
+        * The Url to go to when a user calls `checkout()`
+        */
         checkoutUrl: {
           type: String,
           value: 'https://testcheckout.buckaroo.nl/html/'
         },
 
+        /**
+        * The Url to return to when a transaction was successfull
+        */
         successCallbackUrl: {
           type: String
         },
 
+        /**
+        * The Url to return to when a transaction was canceled
+        */
         cancelCallbackUrl: {
           type: String
         },
 
+        /**
+        * The Url to return to when a transaction was errored
+        */
         errorCallbackUrl: {
           type: String
         },
 
+        /**
+        * The Url to return to when a transaction was rejected
+        */
         rejectCallbackUrl: {
           type: String
         },
 
+        /**
+        * Exposes whether `checkout()` is allowed
+        */
         checkoutAllowed: {
           type: Boolean,
           value: false,
           computed: '_computeCheckoutAllowed(_signatureData.signature, considerationsAccepted, contractAccepted)',
-          notify: true
-        },
-
-        draftContract: {
-          type: String,
-          computed: '_computeDraftContract(_draftContractData.body, considerationsAccepted)',
           notify: true
         },
 
@@ -400,25 +456,35 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       },
 
       observers: [
-        '_getTransactionCosts(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)',
+        'getTransactionCosts(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)',
         'getDraftContract(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, considerationsAccepted)',
         '_resetConsiderations(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken)'
       ],
 
+      /**
+      * Checkout
+      */
       checkout: function() {
+        if(!this.checkoutAllowed) return;
         this.$.checkoutForm.submit();
       },
 
+      /**
+      * Download the `draftContract`
+      */
       getDraftContract: function() {
         this.$.getDraftContract.generateRequest();
       },
 
-      _resetConsiderations: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {
-        this.considerationsAccepted = false;
+      /**
+      * Download the `transactionCosts`
+      */
+      getTransactionCosts: function() {
+        this.$.getTransactionCosts.generateRequest();
       },
 
-      _getTransactionCosts: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {
-        this.$.getTransactionCosts.generateRequest();
+      _resetConsiderations: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken) {
+        this.considerationsAccepted = false;
       },
 
       _computeRequestHeaders: function(accessToken) {
