@@ -477,8 +477,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       * Download the `draftContract`
       */
       getDraftContract: function() {
-      var args = [].slice.call(arguments);
-        console.log('arguments', arguments, args)
+        var args = [].slice.call(arguments);
         if( (args.indexOf(null) !== -1) || (args.indexOf(false) !== -1) ) return;
         this.$.getDraftContract.generateRequest();
       },
