@@ -93,7 +93,7 @@
             <input type="text" value="{{campaignId::input}}" name="campaignId"><p>
             <label for="token">contract type id</label><br>
             <select value="{{contractTypeId::change}}" disabled$="[[!availableContractTypes]]">
-              <option>kies...</option>
+              <option value="null">kies...</option>
               <template is="dom-repeat" items="[[availableContractTypes]]">
                 <option value="[[item.id]]">[[item.id]]</option>
               </template>
@@ -112,6 +112,7 @@
             <label for="token">incentive id</label><br>
             <select value="{{incentiveId::change}}" disabled$="[[!availableIncentives]]">
               <option>kies...</option>
+              <option value="null">Ik hoef geen beloning</option>
               <template is="dom-repeat" items="[[availableIncentives]]">
                 <option value="[[item.id]]" disabled$="[[!item.available]]">[[item.id]] ([[item.minimumInvestment]] of meer)</option>
               </template>
