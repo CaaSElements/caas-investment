@@ -188,14 +188,16 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         * The id of the associated contract type
         */
         contractTypeId: {
-          type: String
+          type: String,
+          observer: '_handleContractTypeIdChanged'
         },
 
         /**
         * Investable amount, in euros
         */
         amount: {
-          type: Number
+          type: Number,
+          value: null
         },
 
         /**
@@ -203,7 +205,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         */
         smallestAllowedAmount: {
           type: Number,
-          computed: '_computeSmallestAllowedAmount(contractTypeId, availableContractTypes.*)',
+          computed: '_computeSmallestAllowedAmount(contractTypeId, availableContractTypes.*, incentiveId)',
           notify: true
         },
 
@@ -229,7 +231,8 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         * The id of the chosen incentive
         */
         incentiveId: {
-          type: String
+          type: String,
+          value: null
         },
 
         /**
@@ -305,7 +308,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         availableIncentives: {
           type: Array,
           value: null,
-          computed: '_computeAvailableIncentives(_apiIncentives.*, contractTypeId)',
+          computed: '_computeAvailableIncentives(_apiIncentives.*, contractTypeId, amount)',
           notify: true
         },
 
@@ -474,6 +477,8 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       * Download the `draftContract`
       */
       getDraftContract: function() {
+        var args = [].slice.call(arguments);
+        if( (args.indexOf(null) !== -1) || (args.indexOf(false) !== -1) ) return;
         this.$.getDraftContract.generateRequest();
       },
 
@@ -517,8 +522,13 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         })
       },
 
-      _computeAvailableIncentives: function(apiIncentives, contractTypeId) {
-        return this._apiIncentives[contractTypeId];
+      _computeAvailableIncentives: function(apiIncentives, contractTypeId, amount) {
+        if(!amount) return this._apiIncentives[contractTypeId] || [];
+
+        if(!this._apiIncentives[contractTypeId]) return [];
+        return this._apiIncentives[contractTypeId].filter(function(incentive) {
+          return incentive.minimumInvestment <= amount;
+        });
       },
 
       _computeConsiderations: function(apiEndpoint, campaignId, contractTypeId, amount, incentiveId, accessToken, transactionCosts) {
@@ -559,16 +569,24 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         return contractTypeIds;
       },
 
-      _computeSmallestAllowedAmount: function(contractTypeId, contractTypesChange) {
+      _computeSmallestAllowedAmount: function(contractTypeId, contractTypesChange, incentiveId) {
         var contractTypes = contractTypesChange.base;
+        if(!contractTypes) return null;
         var selectedContractType = contractTypes.filter(function(contractType) {
           return contractType.id == contractTypeId;
         })[0]
-        return (selectedContractType) ? selectedContractType.smallestAllowedInvestment : null;
+
+        var incentive = this._getIncentiveById(incentiveId);
+        var incentiveMinimum = (incentive) ? incentive.minimumInvestment : 0;
+
+        var contractTypeMinimum = (selectedContractType) ? selectedContractType.smallestAllowedInvestment : null;
+
+        return (contractTypeMinimum > incentiveMinimum) ? contractTypeMinimum : incentiveMinimum;
       },
 
       _computeLargestAllowedAmount: function(contractTypeId, contractTypesChange) {
         var contractTypes = contractTypesChange.base;
+        if(!contractTypes) return null;
         var selectedContractType = contractTypes.filter(function(contractType) {
           return contractType.id == contractTypeId;
         })[0]
@@ -577,6 +595,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       _computeAmountStep: function(contractTypeId, contractTypesChange) {
         var contractTypes = contractTypesChange.base;
+        if(!contractTypes) return null;
         var selectedContractType = contractTypes.filter(function(contractType) {
           return contractType.id == contractTypeId;
         })[0]
@@ -615,6 +634,17 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
           message: evt.detail.error.message,
           response: event.detail.request.xhr.response
         });
+      },
+
+      _handleContractTypeIdChanged: function(contractTypeId) {
+        this.incentiveId = null;
+      },
+
+      _getIncentiveById(id) {
+        if(!this.availableIncentives) return false;
+        return this.availableIncentives.filter(function(incentive) {
+          return incentive.id === id;
+        })[0];
       }
 
     });
