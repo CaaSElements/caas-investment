@@ -610,7 +610,6 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         if(considerationsAccepted) this.fire('considerations-accepted');
         else this.fire('considerations-unaccepted');
         this.fire('considerations-acceptance-changed', considerationsAccepted);
-        this.contractAccepted = false;
       },
 
       _handleGetSignatureResponse: function() {
