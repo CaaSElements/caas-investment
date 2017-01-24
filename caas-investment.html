@@ -272,7 +272,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         */
         draftContract: {
           type: String,
-          computed: '_computeDraftContract(_draftContractData.body, considerationsAccepted)',
+          computed: '_computeDraftContract(_draftContractData.body)',
           notify: true
         },
 
@@ -603,7 +603,6 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       },
 
       _computeDraftContract: function(draftContractBody, considerationsAccepted) {
-        if(!considerationsAccepted) return '';
         return draftContractBody;
       },
 
