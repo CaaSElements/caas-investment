@@ -285,6 +285,14 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         },
 
         /**
+        * Exposes whether the user accepted the terms of use
+        */
+        termsOfUseAccepted: {
+          type: Boolean,
+          notify: true
+        },
+
+        /**
         * Exposes the additional transaction costs for this investment
         */
         transactionCosts: {
@@ -412,7 +420,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         checkoutAllowed: {
           type: Boolean,
           value: false,
-          computed: '_computeCheckoutAllowed(_signatureData.signature, considerationsAccepted, contractAccepted)',
+          computed: '_computeCheckoutAllowed(_signatureData.signature, considerationsAccepted, contractAccepted, termsOfUseAccepted)',
           notify: true
         },
 
@@ -557,8 +565,8 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       },
 
-      _computeCheckoutAllowed: function(signature, considerationsAccepted, contractAccepted) {
-        return (!!signature && !!considerationsAccepted && !!contractAccepted);
+      _computeCheckoutAllowed: function(signature, considerationsAccepted, contractAccepted, termsOfUseAccepted) {
+        return (!!signature && !!considerationsAccepted && !!contractAccepted &&!!termsOfUseAccepted);
       },
 
       _computeTransactionCosts: function(costs) {
