@@ -32,7 +32,6 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       handle-as="json"
       method="GET"
       last-response="{{_transactionCostsData}}"
-      debounce-duration="3000"
     ></iron-ajax>
 
     <iron-ajax
@@ -45,7 +44,6 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       last-response="{{_draftContractData}}"
       on-response="_handleGetContractResponse"
       on-error="_handleGetContractError"
-      debounce-duration="3000"
     ></iron-ajax>
 
     <iron-ajax
@@ -59,7 +57,6 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       last-response="{{_signatureData}}"
       on-response="_handleGetSignatureResponse"
       on-error="_handleGetSignatureError"
-      debounce-duration="3000"
       auto="[[bic]]"
     ></iron-ajax>
 
