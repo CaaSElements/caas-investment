@@ -643,7 +643,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         this.incentiveId = null;
       },
 
-      _getIncentiveById(id) {
+      _getIncentiveById: function (id) {
         if(!this.availableIncentives) return false;
         return this.availableIncentives.filter(function(incentive) {
           return incentive.id === id;
