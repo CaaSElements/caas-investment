@@ -7,7 +7,7 @@
 `caas-investment`
 Polymer Investment Element for Crowdfunding as a Service Solutions
 
-@demo demo/index.html 
+@demo demo/index.html
 -->
 
 <dom-module id="caas-investment">
@@ -15,7 +15,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
     <caas-campaign
       api-endpoint="[[apiEndpoint]]"
-      campaign-id="[[campaignId]]"
+      campaign-slug="[[campaignId]]"
       contract-types="{{availableContractTypes}}"
     ></caas-campaign>
 
@@ -65,95 +65,95 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       action="[[checkoutUrl]]"
       method="POST"
     >
-    <input  
-    type="hidden"                
+    <input
+    type="hidden"
     readonly
-    name="Add_userId"  
+    name="Add_userId"
     value="[[_signatureData.userId]]">
-    <input  
-    type="hidden"                
+    <input
+    type="hidden"
     readonly
-    name="Add_campaignId"  
+    name="Add_campaignId"
     value="[[_signatureData.campaignId]]">
-    <input  
-    type="hidden"                
+    <input
+    type="hidden"
     readonly
-    name="Add_contractTypeId"  
+    name="Add_contractTypeId"
     value="[[_signatureData.contractTypeId]]">
     <input
-    type="hidden"                
+    type="hidden"
     readonly
-    name="Add_incentiveId"  
+    name="Add_incentiveId"
     value="[[_signatureData.incentiveId]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_amount"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_amount"
     value="[[_signatureData.amount]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_currency"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_currency"
     value="[[_signatureData.currency]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_description"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_description"
     value="[[_signatureData.description]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_invoicenumber"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_invoicenumber"
     value="[[_signatureData.invoiceNumber]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_PAYMENT_METHOD"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_PAYMENT_METHOD"
     value="[[_signatureData.paymentMethod]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_return"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_return"
     value="[[successCallbackUrl]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_returncancel"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_returncancel"
     value="[[cancelCallbackUrl]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_returnerror"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_returnerror"
     value="[[errorCallbackUrl]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_returnreject"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_returnreject"
     value="[[rejectCallbackUrl]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_SERVICE_ideal_action"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_SERVICE_ideal_action"
     value="[[_signatureData.iDEALAction]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_SERVICE_ideal_issuer"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_SERVICE_ideal_issuer"
     value="[[_signatureData.iDEALIssuer]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_SERVICE_ideal_version"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_SERVICE_ideal_version"
     value="[[_signatureData.iDEALVersion]]">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_websitekey"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_websitekey"
     value="{{_signatureData.websiteKey}}">
-    <input  
-    type="hidden"                
-    readonly 
-    name="Brq_signature"  
+    <input
+    type="hidden"
+    readonly
+    name="Brq_signature"
     value="{{_signatureData.signature}}">
     </form>
 
@@ -500,7 +500,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
 
       _computeRequestHeaders: function(accessToken) {
         return {
-          'authorization': 'Bearer ' + accessToken 
+          'authorization': 'Bearer ' + accessToken
         }
       },
 
