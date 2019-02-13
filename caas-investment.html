@@ -193,8 +193,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         * Investable amount, in euros
         */
         amount: {
-          type: Number,
-          value: null
+          type: Number
         },
 
         /**
@@ -202,7 +201,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         */
         smallestAllowedAmount: {
           type: Number,
-          computed: '_computeSmallestAllowedAmount(contractTypeId, availableContractTypes.*, incentiveId)',
+          computed: '_computeSmallestAllowedAmount(contractTypeId, availableContractTypes.*)',
           notify: true
         },
 
