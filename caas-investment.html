@@ -530,11 +530,9 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       },
 
       _computeAvailableIncentives: function(apiIncentives, contractTypeId, amount) {
-        if(!amount) return this._apiIncentives[contractTypeId] || [];
-
-        if(!this._apiIncentives[contractTypeId]) return [];
-        return this._apiIncentives[contractTypeId].filter(function(incentive) {
-          return incentive.minimumInvestment <= amount;
+        if (Object.keys(apiIncentives.value).length == 0) return null;
+        return apiIncentives.value[contractTypeId].filter(function(incentive) {
+          return incentive;
         });
       },
 
@@ -573,28 +571,31 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
         return contractTypeIds;
       },
 
-      _computeSmallestAllowedAmount: function(contractTypeId, contractTypesChange, incentiveId) {
+      _computeSmallestAllowedAmount: function(contractTypeId, contractTypesChange) {
         var contractTypes = contractTypesChange.base;
-        if(!contractTypes) return null;
-        var selectedContractType = contractTypes.filter(function(contractType) {
-          return contractType.id == contractTypeId;
-        })[0]
-
-        var incentive = this._getIncentiveById(incentiveId);
-        var incentiveMinimum = (incentive) ? incentive.minimumInvestment : 0;
-
-        var contractTypeMinimum = (selectedContractType) ? selectedContractType.smallestAllowedInvestment : null;
-
-        return (contractTypeMinimum > incentiveMinimum) ? contractTypeMinimum : incentiveMinimum;
+        if (contractTypes) {
+          var selectedContractType = contractTypes.filter(function(contractType) {
+            return contractType.id == contractTypeId;
+          })
+          return selectedContractType[0].smallestAllowedInvestment;
+        }
+        // var incentive = this._getIncentiveById(incentiveId);
+        // var incentiveMinimum = (incentive) ? incentive.minimumInvestment : 0;
+        // var contractTypeMinimum = (selectedContractType) ? selectedContractType.smallestAllowedInvestment : null;
+        // return (contractTypeMinimum > incentiveMinimum) ? contractTypeMinimum : incentiveMinimum;
+        // if (selectedContractType) return contractTypes[0].smallestAllowedInvestment;
       },
 
       _computeLargestAllowedAmount: function(contractTypeId, contractTypesChange) {
+        // if(!contractTypes) return null;
         var contractTypes = contractTypesChange.base;
-        if(!contractTypes) return null;
-        var selectedContractType = contractTypes.filter(function(contractType) {
-          return contractType.id == contractTypeId;
-        })[0]
-        return (selectedContractType) ? selectedContractType.largestAllowedInvestment : null;
+        if (contractTypes) {
+          var selectedContractType = contractTypes.filter(function(contractType) {
+            return contractType.id == contractTypeId;
+          });
+          return selectedContractType[0].largestAllowedInvestment;
+        }
+        // return (selectedContractType) ? selectedContractType.largestAllowedInvestment : null;
       },
 
       _computeAmountStep: function(contractTypeId, contractTypesChange) {
