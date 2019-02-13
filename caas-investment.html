@@ -483,6 +483,7 @@ Polymer Investment Element for Crowdfunding as a Service Solutions
       */
       getDraftContract: function() {
         var args = [].slice.call(arguments);
+        args[0] = 0; // setting Incentive id to 0 to send it correct on contract in rest API
         if( (args.indexOf(null) !== -1) || (args.indexOf(false) !== -1) ) return;
         this.$.getDraftContract.generateRequest();
       },
